@@ -1,0 +1,17 @@
+[package]
+name = "fx-pgmux"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jakob Lilliemarck <lilliemarckjakob@gmail.com>"]
+description = "sqlx::PgListner multiplexing, making it trivial to use a single listener for separate concerns"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/jakob-lilliemarck/fx-pgmux"
+
+[dependencies]
+sqlx = { version = "0.8", features = ["macros", "migrate", "runtime-tokio", "tls-rustls-ring", "postgres", "chrono", "uuid"] }
+anyhow = { version = "1.0.95" }
+tracing = "0.1.41"
+futures = "0.3.32"
+
+[dev-dependencies]
+tokio = { version = "1.44", features = ["rt", "macros"] }
