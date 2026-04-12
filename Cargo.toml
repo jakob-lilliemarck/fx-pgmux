@@ -3,6 +3,7 @@ name = "fx-pgmux"
 version = "0.1.0"
 edition = "2024"
 authors = ["Jakob Lilliemarck <lilliemarckjakob@gmail.com>"]
+
 description = "sqlx::PgListner multiplexing, making it trivial to use a single listener for separate concerns"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/jakob-lilliemarck/fx-pgmux"
