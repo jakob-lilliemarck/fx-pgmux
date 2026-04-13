@@ -2,6 +2,12 @@ use futures::{Stream, StreamExt, channel::mpsc};
 use sqlx::{PgPool, postgres::PgListener};
 use std::collections::HashMap;
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Database error: {0}")]
+    Database(#[from] sqlx::Error),
+}
+
 pub struct Multiplexer {
     pg_listener: PgListener,
     channels: HashMap<&'static str, Vec<mpsc::UnboundedSender<String>>>,
@@ -25,7 +31,7 @@ impl Stream for NotificationStream {
 }
 
 impl Multiplexer {
-    pub async fn new(pool: &PgPool) -> anyhow::Result<Self> {
+    pub async fn new(pool: &PgPool) -> Result<Self, Error> {
         let pg_listener = PgListener::connect_with(pool).await?;
 
         Ok(Self {
@@ -34,7 +40,7 @@ impl Multiplexer {
         })
     }
 
-    pub async fn register(&mut self, channel: &'static str) -> anyhow::Result<NotificationStream> {
+    pub async fn register(&mut self, channel: &'static str) -> Result<NotificationStream, Error> {
         let (tx, rx) = mpsc::unbounded();
 
         let entry = self.channels.entry(channel).or_default();
@@ -48,7 +54,7 @@ impl Multiplexer {
         Ok(NotificationStream { rx })
     }
 
-    pub async fn listen(mut self) -> anyhow::Result<()> {
+    pub async fn listen(mut self) -> Result<(), Error> {
         loop {
             // Propagate errors - the listener should already handle reconnection internally.
             // If an error is received here its likely not easily recoverable

@@ -398,6 +398,7 @@ dependencies = [
  "anyhow",
  "futures",
  "sqlx",
+ "thiserror",
  "tokio",
  "tracing",
 ]

@@ -10,9 +10,11 @@ repository = "https://github.com/jakob-lilliemarck/fx-pgmux"
 
 [dependencies]
 sqlx = { version = "0.8", features = ["macros", "migrate", "runtime-tokio", "tls-rustls-ring", "postgres", "chrono", "uuid"] }
-anyhow = { version = "1.0.95" }
 tracing = "0.1.41"
 futures = "0.3.32"
+thiserror = "2.0.12"
 
 [dev-dependencies]
 tokio = { version = "1.44", features = ["rt", "macros"] }
+anyhow = { version = "1.0.95" }
+
