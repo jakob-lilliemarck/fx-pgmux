@@ -65,11 +65,12 @@ impl Multiplexer {
 
             if let Some(senders) = self.channels.get_mut(channel) {
                 senders.retain(|tx| {
-                    if tx.unbounded_send(payload.to_string()).is_err() {
+                    if let Err(err) = tx.unbounded_send(payload.to_string()) {
                         tracing::warn!(
                             message = "pgmux failed to send notification",
                             channel = channel,
-                            payload = payload
+                            payload = payload,
+                            err = err.to_string(),
                         );
                         return false;
                     }
