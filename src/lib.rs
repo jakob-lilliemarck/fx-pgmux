@@ -40,13 +40,21 @@ impl Multiplexer {
         })
     }
 
-    pub async fn register(&mut self, channel: &'static str) -> Result<NotificationStream, Error> {
+    pub async fn register(
+        &mut self,
+        channel_name: &'static str,
+    ) -> Result<NotificationStream, Error> {
         let (tx, rx) = mpsc::unbounded();
 
-        let entry = self.channels.entry(channel).or_default();
+        let entry = self.channels.entry(channel_name).or_default();
 
         if entry.is_empty() {
-            self.pg_listener.listen(channel).await?;
+            self.pg_listener.listen(channel_name).await?;
+        } else {
+            tracing::warn!(
+                message = "Attempted to re-register channel with mux",
+                channel_name = channel_name
+            )
         }
 
         entry.push(tx);
@@ -67,7 +75,7 @@ impl Multiplexer {
                 senders.retain(|tx| {
                     if let Err(err) = tx.unbounded_send(payload.to_string()) {
                         tracing::warn!(
-                            message = "pgmux failed to send notification",
+                            message = "Mux failed to send notification",
                             channel = channel,
                             payload = payload,
                             err = err.to_string(),
@@ -78,6 +86,20 @@ impl Multiplexer {
                 });
             }
         }
+    }
+
+    pub async fn stop(self) -> Result<(), Error> {
+        tracing::info!(message = "Stopping multiplexer");
+
+        for (channel_name, senders) in self.channels {
+            tracing::info!(
+                message = "terminating channel...",
+                channel_name = channel_name
+            );
+            drop(senders);
+        }
+
+        Ok(())
     }
 }
 
